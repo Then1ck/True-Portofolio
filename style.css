@@ -1,0 +1,246 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    scroll-behavior: smooth;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root{
+    --bg-color: #080808;
+    --second-bg-color: #101010;
+    --text-color: #fff;
+    --main-color: #ff014f;
+    --shadow-color: #b8b6b3;
+}
+
+html {
+    font-size: 62.5%;
+    overflow-x: hidden;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.head {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 4rem 15%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+
+#menu-icon {
+    font-size: 3.5rem;
+    color: var(--main-color);
+    display: none;
+}
+
+.logo {
+    font-size: 3rem;
+    color: var(--text-color);
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
+.logo:hover {
+    transform: scale(1.1);
+}
+
+span{
+    background: linear-gradient(
+        270deg,
+        #DF8908 10%,
+        #ff1d15 100%
+    );
+    background-clip: text;
+    color: transparent;
+}
+
+.name-highlight {
+    background: linear-gradient(90deg, #DF8908 10%, #ff1d15 100%);
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.4rem;
+    color: white; /* Make sure text is visible */
+}
+
+.navbar {
+    font-size: 1.8rem;
+    color: var(--text-color);
+    margin-left: 5rem;
+    font-weight: 700;
+    transition: 0.3s ease-in-out;
+    border-bottom: 3px solid transparent;
+    /* width: 30%; */
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.navbar a {
+    color: var(--text-color);
+}
+
+.navbar a:hover {
+    /* color: var(--main-color); */
+    background: linear-gradient(
+        #DF8908 10%,
+        #ff1d15 100%
+    );
+    background-clip: text;
+    color: transparent;
+    /* font-weight: 1000; */
+    /* border-bottom: 3px solid var(--main-color); */
+}
+
+.gradient-btn {
+    font-size: 1.8rem;
+    padding: 1rem 2rem;
+    border-radius: 3rem;
+    background: linear-gradient(
+        270deg,
+        #DF8908 10%,
+        #ff1d15 100%
+    );
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    color: white;
+    border: none;
+    text-wrap: nowrap;
+}
+
+section {
+    min-height: 100vh;
+    padding: 10rem 15%;
+}
+
+.home {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15rem;
+}
+
+.home-in {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.home-in h1 {
+    font-size: 7rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 1.5rem;
+    /* background-color: red; */
+}
+
+.home-in h2 {
+    font-size: 6rem;
+    display: flex;
+}
+
+.home-in h3 {
+    font-size: 4rem;
+    margin-top: 1rem;
+}
+
+.home-in p {
+    font-size: 1.5rem;
+    font-weight: 500;
+    font-weight: 1.8;
+}
+
+.home-img img {
+    width: 32vw;
+    height: 32vw;
+    border-radius: 50%;
+    box-shadow: 0 0 25px var(--shadow-color);
+    animation: float 3s ease-in-out infinite;
+    transition: 0.4s ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.home-img img:hover {
+    box-shadow: 
+    0 0 25px var(--shadow-color), 
+    /* 0 0 50px var(--main-color),  */
+    0 0 75px var(--shadow-color);
+}
+
+.socials {
+    display: flex;
+    gap: 1rem;
+}
+
+.about {
+    background-color: #0f0f0f;
+}
+
+.soc-btn {
+    width: clamp(4rem, 5vw, 6rem);   /* Responsive width */
+    aspect-ratio: 1 / 1;                 /* Ensures it's a square */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;                 /* Perfect circle */
+    background: linear-gradient(
+        270deg,
+        #DF8908 10%,
+        #ff1d15 100%
+    );
+
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    color: white;
+    border: none;
+    padding: 0;                          /* Ensure padding doesn't break shape */
+    overflow: hidden;                   /* Prevent icon overflow */
+}
+
+.soc-btn img {
+    width: 60%;   /* or adjust to your liking */
+    height: auto;
+    display: block;
+    filter: brightness(0) invert(1); /* Optional: make black SVGs white */
+    transition: transform 0.3s ease;
+}
+
+@media(max-width: 1285px){
+    .home {
+        flex-direction: column-reverse;
+        text-align: center;
+        gap: 5rem;
+
+    }
+
+    .home-img img {
+        width: 48vw;
+        height: 48vw;
+    }
+
+    .home-in {
+        display: block;
+    }
+}
