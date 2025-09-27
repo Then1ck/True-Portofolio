@@ -158,9 +158,9 @@ section {
 }
 
 .home-in p {
-    font-size: 1.5rem;
-    font-weight: 500;
-    font-weight: 1.8;
+    font-size: 2rem;
+    font-weight: 400;
+    padding: 2rem 1rem;
 }
 
 .home-img img {
@@ -191,9 +191,14 @@ section {
 .socials {
     display: flex;
     gap: 1rem;
+    margin-top: 2rem;
 }
 
 .about {
+    background-color: #0f0f0f;
+}
+
+.projects {
     background-color: #0f0f0f;
 }
 
@@ -205,18 +210,23 @@ section {
     justify-content: center;
 
     border-radius: 50%;                 /* Perfect circle */
-    background: linear-gradient(
-        270deg,
-        #DF8908 10%,
-        #ff1d15 100%
-    );
+    
 
     cursor: pointer;
     transition: transform 0.3s ease-in-out;
     color: white;
     border: none;
     padding: 0;                          /* Ensure padding doesn't break shape */
-    overflow: hidden;                   /* Prevent icon overflow */
+    overflow: hidden;
+    border: 0.2rem solid white;
+}
+
+.soc-btn:hover {
+    background: linear-gradient(
+        270deg,
+        #DF8908 10%,
+        #ff1d15 100%
+    );
 }
 
 .soc-btn img {
