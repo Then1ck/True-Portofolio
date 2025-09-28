@@ -13,6 +13,10 @@
     --text-color: #fff;
     --main-color: #ff014f;
     --shadow-color: #b8b6b3;
+    --gradient-1: #0890df;
+    --gradient-2: #00c52b;
+    --gradient-3: #ff1d15;
+    --gradient-4: #DF8908;
 }
 
 html {
@@ -60,15 +64,15 @@ body {
 span{
     background: linear-gradient(
         270deg,
-        #DF8908 10%,
-        #ff1d15 100%
+        var(--gradient-1) 10%,
+        var(--gradient-2) 100%
     );
     background-clip: text;
     color: transparent;
 }
 
 .name-highlight {
-    background: linear-gradient(90deg, #DF8908 10%, #ff1d15 100%);
+    background: linear-gradient(90deg, var(--gradient-1) 10%, var(--gradient-2) 100%);
     padding: 0.3rem 0.6rem;
     border-radius: 0.4rem;
     color: white; /* Make sure text is visible */
@@ -94,8 +98,8 @@ span{
 .navbar a:hover {
     /* color: var(--main-color); */
     background: linear-gradient(
-        #DF8908 10%,
-        #ff1d15 100%
+        var(--gradient-1) 10%,
+        var(--gradient-2) 100%
     );
     background-clip: text;
     color: transparent;
@@ -109,8 +113,8 @@ span{
     border-radius: 3rem;
     background: linear-gradient(
         270deg,
-        #DF8908 10%,
-        #ff1d15 100%
+        var(--gradient-1) 10%,
+        var(--gradient-2) 100%
     );
     letter-spacing: 1px;
     cursor: pointer;
@@ -157,12 +161,6 @@ section {
     margin-top: 1rem;
 }
 
-.home-in p {
-    font-size: 2rem;
-    font-weight: 400;
-    padding: 2rem 1rem;
-}
-
 .home-img img {
     width: 32vw;
     height: 32vw;
@@ -196,6 +194,10 @@ section {
 
 .about {
     background-color: #0f0f0f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15rem;
 }
 
 .projects {
@@ -224,8 +226,8 @@ section {
 .soc-btn:hover {
     background: linear-gradient(
         270deg,
-        #DF8908 10%,
-        #ff1d15 100%
+        var(--gradient-1) 10%,
+        var(--gradient-2) 100%
     );
 }
 
@@ -235,6 +237,121 @@ section {
     display: block;
     filter: brightness(0) invert(1); /* Optional: make black SVGs white */
     transition: transform 0.3s ease;
+}
+
+.abt {
+    display: flex;
+    /* align-items: flex-end; */
+    align-items: end;
+    /* text-align: right; */
+    /* background-color: #4CAF50; */
+    width: 40%;
+}
+
+.about h1{
+    font-size: 7rem;
+    font-weight: 700;
+    padding: 2rem 1rem;
+    text-align: right;
+    /* background-color: #4CAF50; */
+    width: 40%;
+}
+
+.abt p {
+    font-size: 3rem;
+    font-weight: 400;
+    padding: 2rem 1rem;
+    /* width: 50%; */
+}
+
+
+.card-container {
+    perspective: 1000px;
+    /* background-color: red; */
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    /* overflow-x: auto; */
+}
+
+@keyframes float2 {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-1rem);
+    }
+}
+
+.card {
+  width: 30rem;
+  height: 35rem;
+  position: relative;
+  transform-style: preserve-3d;
+    /* animation: float2 3s ease-in-out infinite; */
+  transition: transform 0.8s;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  border-radius: 15px;
+    cursor: pointer;
+}
+
+.card-floating {
+  animation: float2 3s ease-in-out infinite;
+}
+.card-floating:nth-child(1) {
+  animation-delay: 0s;
+}
+.card-floating:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.card-floating:nth-child(3) {
+  animation-delay: 0.5s;
+}
+.card-floating:nth-child(4) {
+  animation-delay: 1s;
+}
+
+.card-floating:nth-child(5) {
+  animation-delay: 1.25s;
+}
+
+.card-floating:nth-child(6) {
+  animation-delay: 1.5s;
+}
+
+.card-floating:nth-child(7) {
+  animation-delay: 1.75s;
+}
+
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: white;
+  font-size: 1.2em;
+  padding: 20px;
+}
+
+.card-front {
+  background: #4CAF50;
+}
+
+.card-back {
+  background: #f44336;
+  transform: rotateY(180deg);
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
 }
 
 @media(max-width: 1285px){
@@ -254,3 +371,4 @@ section {
         display: block;
     }
 }
+
