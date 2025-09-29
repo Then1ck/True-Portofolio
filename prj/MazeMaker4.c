@@ -137,7 +137,12 @@ int main()
 	system("mode con: cols=120 lines=50");
 	srand(time(NULL));
 	int size, i, j;
-	scanf("%d", &size);
+	while(1){
+		printf("Input size: ");
+		scanf("%d", &size);
+		if(size > 15)printf("Size might not fit within the window...\n");
+		else break;
+	}
 	system("cls");
 	for(i=0;i<size;i++){
 		for(j=0;j<size;j++){
