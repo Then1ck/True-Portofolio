@@ -1,0 +1,302 @@
+package game;
+
+import java.awt.Cursor;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+
+import controls.KeyboardInputs;
+import controls.MouseInputs;
+import controls.MouseMovements;
+import controls.MouseWheelInputs;
+import entities.Player;
+import hitboxes.FloorCheck;
+import mainPanel.Camera;
+import mainPanel.GamePanel;
+import mainPanel.SimulatedMouse;
+import room.CreateRoomFloor;
+import weapon.Gun1;
+import weapon.Gun2;
+import weapon.Gun3;
+import weapon.Projectiles;
+import weapon.RangedWeapons;
+import weapon.Weapons;
+
+public class Game {
+	
+	private JFrame mainFrame;
+	
+	private int tileSize;
+	private double scale;
+	
+	private GamePanel Gp;
+	
+	private KeyboardInputs KeyI;
+	private MouseInputs MouseI;
+	private MouseMovements MouseM;
+	private MouseWheelInputs MouseW;
+	
+	private Camera mainCams;
+	private Weapons heldWeapon;
+	
+	private int gameState = 0;
+	private int weaponType = 0;
+	private int Length, Height;
+	
+	private Player P1;
+	private SimulatedMouse SimulM;
+	private FloorCheck FC;
+	private CreateRoomFloor CreateR;
+
+	private Gun1 basic;
+	private Gun2 burst;
+	private Gun3 shotGun;
+	
+	private BufferedImage tempRoom=null;
+
+	private BufferedImage blankCursor, temp;
+	
+	public Game(GamePanel gp, KeyboardInputs keyI, MouseInputs mouseI, MouseMovements mouseM, MouseWheelInputs mouseW, JFrame _mainFrame) {
+		this.mainFrame = _mainFrame;
+		
+		this.Gp = gp;
+		
+		this.KeyI = keyI;
+		this.MouseI = mouseI;
+		this.MouseM = mouseM;
+		this.MouseW = mouseW;
+		this.SimulM = new SimulatedMouse(MouseM, _mainFrame, gp, 32);
+
+		
+		Length = 32;
+		Height = 16;
+		this.mainCams = new Camera(SimulM, Gp);
+		this.P1 = new Player(mainCams, Length*tileSize, Height*tileSize);
+		this.mainCams.addPlayer(P1);
+		
+		try {
+			this.blankCursor = ImageIO.read(getClass().getResourceAsStream("/cursors/Blank.png"));
+			Cursor blanks = Toolkit.getDefaultToolkit().createCustomCursor(this.blankCursor, new Point(16, 16), "blank cursor");
+			mainFrame.getContentPane().setCursor(blanks);
+			this.temp = ImageIO.read(getClass().getResourceAsStream("/cursors/PtrCursor.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		MouseM.SimulAdd(SimulM);
+		
+		System.out.println("Test");
+		try {
+			System.out.println("Do tempe");
+			tempRoom = ImageIO.read(new FileInputStream("tempFiles/temp/room.png"));
+			CreateR = new CreateRoomFloor(Length, Height, Gp, mainCams, tempRoom);
+			CreateR.loadMap();
+			System.out.println("Not NULL");
+		} catch (IOException e) {
+			System.out.println("Tempe no");
+			CreateR = new CreateRoomFloor(Length, Height, Gp, mainCams);
+			tempRoom = CreateR.getRoom();
+			System.out.println("IS NULL");
+		}
+		System.out.println("End test");
+
+		ArrayList<Projectiles> bullets = new ArrayList<Projectiles>(), delBullets = new ArrayList<Projectiles>();
+		basic = new Gun1(20);
+		burst = new Gun2(45, 3, 5);
+		shotGun = new Gun3(50, 15);
+		basic.setProjectileList(bullets, delBullets);
+		burst.setProjectileList(bullets, delBullets);
+		shotGun.setProjectileList(bullets, delBullets);
+		
+		heldWeapon = basic;
+
+		this.FC = new FloorCheck(Length, Height);
+		
+		getWeapon();
+		
+	}
+	
+	public void update() {
+		if(heldWeapon instanceof RangedWeapons) {
+			for(Projectiles element : ((RangedWeapons) heldWeapon).getShots() ) {
+				if(element.update()) {
+					((RangedWeapons) heldWeapon).addDel(element);
+				}
+			}
+			((RangedWeapons) heldWeapon).removeProjectiles();
+		}
+		
+		
+		Process();
+//		if(gameState!=1)
+		mainCams.declareCam();
+		KeyI.fullReset();
+		MouseI.fullReset();
+		
+//		System.out.println(heldWeapon.getClass());
+		
+		
+//		for(Projectiles element : basic.getShots()) {
+//			if(element.update()){
+//				basic.addDel(element);
+//			}
+//		}
+//		basic.removeProjectiles();
+//		
+//		for(Projectiles element : burst.getShots()) {
+//			if(element.update()) {
+//				burst.addDel(element);
+//			}
+//		}
+//		burst.removeProjectiles();
+		
+//		for(Projectiles element : shotGun.getShots()) {
+//			if(element.update()) {
+//				shotGun.addDel(element);
+//			}
+//		}
+//		shotGun.removeProjectiles();
+	}
+	
+	private void Process() {
+		if(gameState==1) {
+			if(KeyI.pressed(5))gameState=0;
+			return;
+		}
+		
+		boolean moved = false;
+		if(MouseI.held(0)) {
+			P1.setSpeed(4);
+		}else P1.setSpeed(8);
+
+		if(MouseI.pressed(2)||KeyI.pressed(4)) {
+			System.out.println("Dive!");
+			P1.dive(SimulM.getSMouseX()+mainCams.getCamX(), SimulM.getSMouseY()+mainCams.getCamY());
+		}
+		if(!P1.diveCheck()) {
+			if(KeyI.held(0)) {
+				P1.MoveY(-FC.moveUp(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+			if(KeyI.held(1)) {
+				P1.MoveX(-FC.moveLeft(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+			if(KeyI.held(2)) {
+				P1.MoveY(FC.moveDown(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+			if(KeyI.held(3)) {
+				P1.MoveX(FC.moveRight(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+		}
+		
+		if(KeyI.pressed(7)) {
+			upWeapon();
+		}
+		if(KeyI.pressed(8)) {
+			downWeapon();
+		}
+		if(KeyI.held(9)) {
+			weaponType = 0;
+			getWeapon();
+		}
+		if(KeyI.held(10)) {
+			weaponType = 1;
+			getWeapon();
+		}
+		if(KeyI.held(11)) {
+			weaponType = 2;
+			getWeapon();
+		}
+		
+		attackAttempt();
+		
+		if(moved)P1.changeState(1);
+		else P1.changeState(0);
+		if(KeyI.pressed(5)) {
+			MouseM.flipCursor();
+			SimulM.swapCursor();
+			if(gameState==1) {
+				gameState=0;
+			}else {
+				gameState = 1;
+			}
+		}
+	}
+	
+	public void attackAttempt() {
+		if(!heldWeapon.countDown())return;
+		if(!MouseI.held(0)&&!KeyI.held(6))return;
+		if(heldWeapon instanceof RangedWeapons) {
+			((RangedWeapons) heldWeapon).addProjectiles(P1.getWorldX(), P1.getWorldY(), SimulM.getSMouseX()+mainCams.getCamX(), 
+						SimulM.getSMouseY()+mainCams.getCamY(), mainCams);
+		}
+		
+	}
+	
+	public void getWeapon() {
+		switch(weaponType) {
+		case 0:
+			this.heldWeapon = basic;
+			break;
+		case 1:
+			this.heldWeapon = burst;
+			break;
+		case 2:
+			this.heldWeapon = shotGun;
+			break;
+		}
+	}
+	
+	public void upWeapon() {
+		weaponType = (weaponType-1) < 0 ? 2 : weaponType-1;
+		getWeapon();
+	}
+	
+	public void downWeapon() {
+		weaponType = (weaponType+1)%3;
+		getWeapon();
+	}
+	
+	public BufferedImage getRoom() {
+		return tempRoom;
+	}
+	
+	public void drawAll(Graphics2D g2) {
+
+		g2.drawImage(temp, 0-mainCams.getCamX(), 0-mainCams.getCamY(), tileSize, tileSize, null);
+		
+		drawRoom(g2);
+		
+		g2.drawLine(SimulM.getSMouseX(), SimulM.getSMouseY(), P1.getWorldX()-mainCams.getCamX(), P1.getWorldY()-mainCams.getCamY());
+		
+		drawProjectiles(g2);
+		P1.draw(g2);
+	}
+	
+	public void drawMouse(Graphics2D g2) {
+		SimulM.draw(g2);
+	}
+	
+	public void drawRoom(Graphics2D g2) {
+		g2.drawImage(tempRoom, -mainCams.getCamX(), -mainCams.getCamY(), Length*tileSize, Height*tileSize, null);
+		System.out.println("Drawn");
+	}
+	
+	public void drawProjectiles(Graphics2D g2) {
+		if(heldWeapon instanceof RangedWeapons) {
+			for(Projectiles element : ((RangedWeapons) heldWeapon).getShots()) {
+				element.draw(g2);
+			}
+		}
+	}
+}

@@ -1,0 +1,419 @@
+package mainPanel;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.io.FileInputStream;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import controls.KeyboardInputs;
+import controls.MouseInputs;
+import controls.MouseMovements;
+import controls.MouseWheelInputs;
+import entities.Player;
+import hitboxes.FloorCheck;
+import room.CreateRoomFloor;
+import weapon.Gun1;
+import weapon.Gun2;
+import weapon.Gun3;
+import weapon.Projectiles;
+import weapon.RangedWeapons;
+import weapon.Weapons;
+
+public class GamePanel extends JPanel implements Runnable{
+	private BufferedImage blankCursor, temp;
+	private int screenWidth, screenHeight, tileSize;
+	private double scale = 1;
+	private Thread gameThread;
+	private JFrame mainFrame;
+	
+	private KeyboardInputs KeyI;
+	private MouseInputs MouseI;
+	private MouseMovements MouseM;
+	private MouseWheelInputs MouseW;
+	
+	private Player P1;
+	private Camera mainCams;
+	private SimulatedMouse SimulM;
+	private CreateRoomFloor CreateR;
+	private int Length, Height;
+	
+	private int FPS = 60;
+	
+	private BufferedImage tempRoom=null, pauseBg=null;
+	
+	private FloorCheck FC;
+	
+	private Weapons heldWeapon;
+	private int weaponType = 0;
+	private Gun1 basic;
+	private Gun2 burst;
+	private Gun3 shotGun;
+	
+	private int gameState = 0;
+
+	public GamePanel(JFrame _mainFrame) {
+		this.mainFrame = _mainFrame;
+		
+		//Declare window size
+		screenWidth=(int)(1280*scale);
+		screenHeight=(int)(720*scale);
+		tileSize=(int)(64*scale);
+		this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+		
+		//Sets settings
+		this.setFocusable(true);
+		this.setDoubleBuffered(true);
+		this.setBackground(Color.DARK_GRAY);
+		
+		//declare controls
+		this.KeyI = new KeyboardInputs();
+		this.MouseI = new MouseInputs();
+		this.MouseM = new MouseMovements();
+		this.MouseW = new MouseWheelInputs(this);
+		
+		//add controls listener
+		this.addKeyListener(KeyI);
+		this.addMouseListener(MouseI);
+		this.addMouseMotionListener(MouseM);
+		this.addMouseWheelListener(MouseW);
+		
+		//Miscellaneous
+		Length = 32;
+		Height = 16;
+		this.SimulM = new SimulatedMouse(MouseM, _mainFrame, this, 32);
+		this.mainCams = new Camera(SimulM, this);
+		this.P1 = new Player(mainCams, Length*tileSize, Height*tileSize);
+		this.mainCams.addPlayer(P1);
+		try {
+			this.blankCursor = ImageIO.read(getClass().getResourceAsStream("/cursors/Blank.png"));
+			Cursor blanks = Toolkit.getDefaultToolkit().createCustomCursor(this.blankCursor, new Point(16, 16), "blank cursor");
+			mainFrame.getContentPane().setCursor(blanks);
+			this.temp = ImageIO.read(getClass().getResourceAsStream("/cursors/PtrCursor.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		MouseM.SimulAdd(SimulM);
+		
+		System.out.println("Test");
+		try {
+			System.out.println("Do tempe");
+			tempRoom = ImageIO.read(new FileInputStream("tempFiles/temp/room.png"));
+			CreateR = new CreateRoomFloor(Length, Height, this, mainCams, tempRoom);
+			CreateR.loadMap();
+			System.out.println("Not NULL");
+		} catch (IOException e) {
+			System.out.println("Tempe no");
+			CreateR = new CreateRoomFloor(Length, Height, this, mainCams);
+			tempRoom = CreateR.getRoom();
+			System.out.println("IS NULL");
+		}
+		System.out.println("End test");
+		
+		ArrayList<Projectiles> bullets = new ArrayList<Projectiles>(), delBullets = new ArrayList<Projectiles>();
+		basic = new Gun1(20);
+		burst = new Gun2(45, 3, 5);
+		shotGun = new Gun3(50, 15);
+		basic.setProjectileList(bullets, delBullets);
+		burst.setProjectileList(bullets, delBullets);
+		shotGun.setProjectileList(bullets, delBullets);
+		
+		this.FC = new FloorCheck(Length, Height);
+		
+		getWeapon();
+		
+		try {
+			pauseBg = ImageIO.read(getClass().getResourceAsStream("/background/PauseBackground.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+//		try {
+//			testArt = ImageIO.read(getClass().getResourceAsStream("/tiles/Flowers.png"));
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	public int getWidth() {
+		return screenWidth;
+	}
+	
+	public int getHeight() {
+		return screenHeight;
+	}
+	
+	public int getTileSize() {
+		return tileSize;
+	}
+	
+	public void startGameThread() {
+		gameThread = new Thread(this);
+		gameThread.start();
+	}
+	
+	@Override
+	public void run() {
+		double drawSpeed = 1000000000/FPS;
+		double delta=0;
+		
+		long prevTime = System.nanoTime();
+		long newTime = System.nanoTime();
+		
+		while(gameThread!=null) {
+			newTime = System.nanoTime();
+			delta += (newTime-prevTime)/drawSpeed;
+			prevTime = newTime;
+			
+			if(delta>=1) {
+				update();
+				repaint();
+//				System.out.println(delta);
+				delta--;
+			}
+		}
+		
+	}
+	
+	public void update() {
+//		printData();
+
+		if(heldWeapon instanceof RangedWeapons) {
+			for(Projectiles element : ((RangedWeapons) heldWeapon).getShots() ) {
+				if(element.update()) {
+					((RangedWeapons) heldWeapon).addDel(element);
+				}
+			}
+			((RangedWeapons) heldWeapon).removeProjectiles();
+		}
+		
+		
+		Process();
+//		if(gameState!=1)
+		mainCams.declareCam();
+		KeyI.fullReset();
+		MouseI.fullReset();
+		
+//		System.out.println(heldWeapon.getClass());
+		
+		
+//		for(Projectiles element : basic.getShots()) {
+//			if(element.update()){
+//				basic.addDel(element);
+//			}
+//		}
+//		basic.removeProjectiles();
+//		
+//		for(Projectiles element : burst.getShots()) {
+//			if(element.update()) {
+//				burst.addDel(element);
+//			}
+//		}
+//		burst.removeProjectiles();
+		
+//		for(Projectiles element : shotGun.getShots()) {
+//			if(element.update()) {
+//				shotGun.addDel(element);
+//			}
+//		}
+//		shotGun.removeProjectiles();
+	}
+	
+	private void Process() {
+		if(gameState==1) {
+			if(KeyI.pressed(5))gameState=0;
+			return;
+		}
+		
+		boolean moved = false;
+		if(MouseI.held(0)) {
+			P1.setSpeed(4);
+		}else P1.setSpeed(8);
+
+		if(MouseI.pressed(2)||KeyI.pressed(4)) {
+			System.out.println("Dive!");
+			P1.dive(SimulM.getSMouseX()+mainCams.getCamX(), SimulM.getSMouseY()+mainCams.getCamY());
+		}
+		if(!P1.diveCheck()) {
+			if(KeyI.held(0)) {
+				P1.MoveY(-FC.moveUp(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+			if(KeyI.held(1)) {
+				P1.MoveX(-FC.moveLeft(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+			if(KeyI.held(2)) {
+				P1.MoveY(FC.moveDown(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+			if(KeyI.held(3)) {
+				P1.MoveX(FC.moveRight(P1.getSpeed(), P1.getWorldX(), P1.getWorldY(), P1.getLbox(), CreateR.getCur()));
+				moved = true;
+			}
+		}
+		
+		if(KeyI.pressed(7)) {
+			upWeapon();
+		}
+		if(KeyI.pressed(8)) {
+			downWeapon();
+		}
+		if(KeyI.held(9)) {
+			weaponType = 0;
+			getWeapon();
+		}
+		if(KeyI.held(10)) {
+			weaponType = 1;
+			getWeapon();
+		}
+		if(KeyI.held(11)) {
+			weaponType = 2;
+			getWeapon();
+		}
+		
+		attackAttempt();
+		
+//		if(basic.countDown()&&MouseI.held(0)) {
+//			basic.addProjectiles(P1.getWorldX(), P1.getWorldY(), SimulM.getSMouseX()+mainCams.getCamX(), 
+//					SimulM.getSMouseY()+mainCams.getCamY(), mainCams);
+//		}
+		
+//		if(burst.countDown()&&MouseI.held(0)) {
+//			burst.addProjectiles(P1.getWorldX(), P1.getWorldY(), SimulM.getSMouseX()+mainCams.getCamX(), 
+//					SimulM.getSMouseY()+mainCams.getCamY(), mainCams);
+//		}
+		
+//		if(shotGun.countDown()&&MouseI.held(0)) {
+//			shotGun.addProjectiles(P1.getWorldX(), P1.getWorldY(), SimulM.getSMouseX()+mainCams.getCamX(), 
+//					SimulM.getSMouseY()+mainCams.getCamY(), mainCams);
+//		}
+		
+//		if(KeyI.pressed(1)) {
+//			System.out.println("Pressed");
+//		}
+		
+		if(moved)P1.changeState(1);
+		else P1.changeState(0);
+		if(KeyI.pressed(5)) {
+			MouseM.flipCursor();
+			SimulM.swapCursor();
+			if(gameState==1) {
+				gameState=0;
+			}else {
+				gameState = 1;
+			}
+		}
+	}
+	
+	public void attackAttempt() {
+		if(!heldWeapon.countDown())return;
+		if(!MouseI.held(0)&&!KeyI.held(6))return;
+		if(heldWeapon instanceof RangedWeapons) {
+			((RangedWeapons) heldWeapon).addProjectiles(P1.getWorldX(), P1.getWorldY(), SimulM.getSMouseX()+mainCams.getCamX(), 
+						SimulM.getSMouseY()+mainCams.getCamY(), mainCams);
+		}
+		
+	}
+	
+	
+//	private void printData() {
+//		System.out.println("-------");
+//		System.out.println(MouseM.getMouseX() + ", " + MouseM.getMouseY());
+//		System.out.println(SimulM.getSMouseX() + ", " + SimulM.getSMouseY());
+//		System.out.println(P1.getWorldX() + ", " + P1.getWorldY());
+//		System.out.println(mainCams.getCamX() + ", " + mainCams.getCamY());
+//		for(Buttons element : KeyI.getKeyList()) {
+//			if(element.isHeld())System.out.print(element.getId() + " ");
+//		}
+//		for(Buttons element : MouseI.getButtonList()) {
+//			if(element.isHeld())System.out.print(element.getId() + " ");
+//		}
+//		System.out.println("Player at " + P1.getWorldX() + ", " + P1.getWorldY());
+//		System.out.println(mainCams.getCamX() + ", " + mainCams.getCamY());
+//		System.out.println("Simul: " + SimulM.getSMouseX() + ", " + SimulM.getSMouseY());
+//		System.out.println("-------");
+//		System.out.println();
+//	}
+	
+	public void getWeapon() {
+		switch(weaponType) {
+		case 0:
+			this.heldWeapon = basic;
+			break;
+		case 1:
+			this.heldWeapon = burst;
+			break;
+		case 2:
+			this.heldWeapon = shotGun;
+			break;
+		}
+	}
+	
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		
+		Graphics2D g2 = (Graphics2D)g;
+		g2.drawImage(temp, 0-mainCams.getCamX(), 0-mainCams.getCamY(), tileSize, tileSize, null);
+//		for(int i=0;i<Height;i++) {
+//			for(int j=0;j<Length;j++) {
+//				CreateR.getTiles(i, j).draw(g2);
+//			}
+//		}
+		
+		
+		g2.drawImage(tempRoom, -mainCams.getCamX(), -mainCams.getCamY(), Length*tileSize, Height*tileSize, null);
+		g2.drawLine(SimulM.getSMouseX(), SimulM.getSMouseY(), P1.getWorldX()-mainCams.getCamX(), P1.getWorldY()-mainCams.getCamY());
+		
+		if(heldWeapon instanceof RangedWeapons) {
+			for(Projectiles element : ((RangedWeapons) heldWeapon).getShots()) {
+				element.draw(g2);
+			}
+		}
+		P1.draw(g2);
+		
+//		for(Projectiles element : basic.getShots()) {
+//			element.draw(g2);
+//		}
+//		for(Projectiles element : burst.getShots()) {
+//			element.draw(g2);
+//		}
+//		for(Projectiles element : shotGun.getShots()) {
+//			element.draw(g2);
+//		}
+		
+		if(gameState==1) {
+			g2.drawImage(pauseBg, 0, 0, screenWidth, screenHeight, null);
+		}
+		
+		SimulM.draw(g2);
+		
+//		g2.drawImage(testArt, 0, 0, 64, 32, 0, 0, 16, 8, null); //Partial drawing
+		//Split object / wall map into 2 : above player and below player, depending on players position
+		
+		g2.dispose();
+	}
+	
+	public void upWeapon() {
+		weaponType = (weaponType-1) < 0 ? 2 : weaponType-1;
+		getWeapon();
+	}
+	
+	public void downWeapon() {
+		weaponType = (weaponType+1)%3;
+		getWeapon();
+	}
+	
+}
+
+//Movement controls, pause menu, change controls, auto hold

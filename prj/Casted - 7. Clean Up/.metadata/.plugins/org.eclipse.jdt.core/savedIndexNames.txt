@@ -1,0 +1,4 @@
+INDEX VERSION 1.134+E:\Nicky Projects\JavaGames\Casted\Casted - 7. Clean Up\.metadata\.plugins\org.eclipse.jdt.core
+4169627870.index
+1755642236.index
+1865797976.index

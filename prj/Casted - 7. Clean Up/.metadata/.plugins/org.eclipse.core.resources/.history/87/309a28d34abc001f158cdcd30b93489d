@@ -1,0 +1,13 @@
+package mainPanel;
+
+import controls.MouseMovements;
+
+public class SimulatedMouse {
+	private MouseMovements MouseM;
+	private int sMouseX, sMouseY;
+
+	public SimulatedMouse(MouseMovements mouseM) {
+		super();
+		MouseM = mouseM;
+	}
+}

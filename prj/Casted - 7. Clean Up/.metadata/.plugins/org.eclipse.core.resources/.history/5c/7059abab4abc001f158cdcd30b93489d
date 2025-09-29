@@ -1,0 +1,95 @@
+package mainPanel;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
+import javax.swing.JPanel;
+
+import controls.Buttons;
+import controls.KeyboardInputs;
+import controls.MouseInputs;
+import controls.MouseMovements;
+
+public class GamePanel extends JPanel implements Runnable{
+	private int screenWidth, screenHeight;
+	private double scale = 1;
+	private Thread gameThread;
+	
+	private KeyboardInputs KeyI;
+	private MouseInputs MouseI;
+	private MouseMovements MouseM;
+	
+	private int FPS = 60;
+	
+	public GamePanel() {
+		//Declare window size
+		screenWidth=(int)(1280*scale);
+		screenHeight=(int)(720*scale);
+		this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+		
+		//Sets settings
+		this.setFocusable(true);
+		this.setDoubleBuffered(true);
+		this.setBackground(Color.BLACK);
+		
+		//declare controls
+		this.KeyI = new KeyboardInputs();
+		this.MouseI = new MouseInputs();
+		this.MouseM = new MouseMovements();
+		
+		//add controls listener
+		this.addKeyListener(KeyI);
+		this.addMouseListener(MouseI);
+		this.addMouseMotionListener(MouseM);
+		
+		this.getMousePosition();
+	}
+	
+	public void startGameThread() {
+		gameThread = new Thread(this);
+		gameThread.start();
+	}
+	
+	@Override
+	public void run() {
+		double drawSpeed = 1000000000/FPS;
+		double delta=0;
+		
+		long prevTime = System.nanoTime();
+		long newTime = System.nanoTime();
+		
+		while(gameThread!=null) {
+			newTime = System.nanoTime();
+			delta += (newTime-prevTime)/drawSpeed;
+			prevTime = newTime;
+			
+			if(delta>=1) {
+				update();
+				repaint();
+				delta--;
+			}
+		}
+		
+	}
+	
+	public void update() {
+		System.out.println(MouseM.getMouseX() + " " + MouseM.getMouseY());
+		for(Buttons element : KeyI.getKeyList()) {
+			if(element.isHeld())System.out.print(element.getId() + " ");
+		}
+		for(Buttons element : MouseI.getButtonList()) {
+			if(element.isHeld())System.out.print(element.getId() + " ");
+		}
+		System.out.println();
+	}
+	
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		
+		Graphics2D g2 = (Graphics2D)g;
+		
+		g2.dispose();
+	}
+}

@@ -272,6 +272,7 @@ section {
     gap: 2rem;
     justify-content: center;
     flex-wrap: wrap;
+    margin-top: 3rem;
     /* overflow-x: auto; */
 }
 
@@ -284,9 +285,20 @@ section {
     }
 }
 
+.bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(8px);
+  z-index: 0;
+}
+
 .card {
   width: 30rem;
-  height: 35rem;
+  height: 33rem;
   position: relative;
   transform-style: preserve-3d;
     /* animation: float2 3s ease-in-out infinite; */
@@ -296,7 +308,7 @@ section {
     cursor: pointer;
 }
 
-.card-floating {
+/* .card-floating {
   animation: float2 3s ease-in-out infinite;
 }
 .card-floating:nth-child(1) {
@@ -322,7 +334,7 @@ section {
 
 .card-floating:nth-child(7) {
   animation-delay: 1.75s;
-}
+} */
 
 
 .card-front,
@@ -331,27 +343,96 @@ section {
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 15px;
+  border-radius: 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: center;
+  /* justify-content: center; */
   flex-direction: column;
   color: white;
   font-size: 1.2em;
-  padding: 20px;
+  padding: 2rem;
+
+  overflow: hidden;
 }
 
 .card-front {
   background: #4CAF50;
 }
 
+.card-front h2,
+.card-back h2,
+.card-front p,
+.card-back p {
+    position: relative;
+    /* z-index: 2; */
+}
+
 .card-back {
-  background: #f44336;
+  background: var(--gradient-1);
   transform: rotateY(180deg);
 }
 
 .card.flipped {
   transform: rotateY(180deg);
+}
+
+.prj h1 {
+    font-size: 7rem;
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+.card h2 {
+    font-size: 3rem;
+}
+
+.card p {
+    font-size: 1.5rem;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.card-back button {
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+  font-size: 1.4rem;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  z-index: 2;
+}
+
+.card-back button:hover {
+  background: var(--gradient-2);
+  color: white;
+}
+
+.download-btn {
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+  font-size: 1.4rem;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.3s ease;
+  z-index: 2;
+}
+
+.download-btn:hover {
+  background: var(--gradient-2);
+  color: white;
+}
+
+.card-front {
+    /* color: rgb(255, 33, 33); */
+    font-weight: 50rem;
 }
 
 @media(max-width: 1285px){

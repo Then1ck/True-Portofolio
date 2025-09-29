@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move 2 elements to &apos;theGame/tempFiles/oldMap&apos;&#x0D;&#x0A;- Original project: &apos;theGame&apos;&#x0D;&#x0A;- Destination element: &apos;theGame/tempFiles/oldMap&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     map.txt&#x0D;&#x0A;     room.png&#x0D;&#x0A;- Update references to refactored element" description="Move files" destination="/tempFiles&lt;oldMap" element1="tempFiles/temp/map.txt" element2="tempFiles/temp/room.png" files="2" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1736392918620" units="0" version="1.0"/>
+</session>
